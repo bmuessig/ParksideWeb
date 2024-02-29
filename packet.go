@@ -22,3 +22,31 @@ type Packet struct {
 	// Received is the time at which the packet was received.
 	Received time.Time
 }
+
+type Polarity string
+
+const (
+	PolarityNone Polarity = ""
+	PolarityDC   Polarity = "DC"
+	PolarityAC   Polarity = "AC"
+)
+
+type Unit string
+
+const (
+	UnitAmpere      string = "A"
+	UnitAmpereMilli string = "mA"
+	UnitAmpereMicro string = "µA"
+	UnitVolt               = "V"
+	UnitVoltMilli          = "mV"
+)
+
+type Reading struct {
+	Received  time.Time
+	Valid     bool
+	Mode      Mode // TODO
+	Unit      Unit
+	Polarity  Polarity
+	Value     float64
+	Precision uint
+}
