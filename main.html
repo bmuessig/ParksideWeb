@@ -11,6 +11,7 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script type="application/javascript">
+        const interval = 1000; //230;
         let config = {};
         let data = {time: 0};
 
@@ -18,29 +19,28 @@
             console.log("Fetching configuration...")
 
             let xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
 
             xhr.addEventListener("error", function(e) {
                 console.log("Could not fetch configuration", e);
                 setTimeout(initialize, 500);
             });
 
-            xhr.addEventListener("load", function(e) {
+            xhr.addEventListener("load", function() {
                 try {
+                    console.log("Applying configuration");
                     config = JSON.parse(this.responseText);
+                    document.title = "ParksideWeb v" + config["version"] + " (" + config["port"] + ")";
+                    value.innerText = config["version"];
+                    mode.innerText = config["port"];
+                    if (config["whitelabel"] === true)
+                        info.classList.add("whitelabel");
                 } catch (e) {
                     console.log("Could not parse configuration", e, this.responseText);
                     setTimeout(initialize, 500);
                     return;
                 }
-                console.log("Configuration fetched and parsed", config);
 
-                console.log("Applying values");
-                document.title = "ParksideWeb v" + config["version"] + " (" + config["port"] + ")";
-                if (config["whitelabel"] === true)
-                    info.classList.add("whitelabel");
-
-                setInterval(acquire, /*230*/ 1000);
+                setInterval(acquire, interval);
             });
 
             xhr.open("GET", new URL("/config.json", window.location.href).toString());
@@ -53,7 +53,6 @@
             console.log("Acquiring data...");
 
             let xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
 
             xhr.addEventListener("error", function(e) {
                 console.log("Could not fetch data", e);
@@ -104,7 +103,7 @@
         <tr id="reading">
             <td>
                 <span id="value"></span>
-                <span id="unit"></span>
+                <span id="unit">ParksideWeb</span>
             </td>
         </tr>
         <tr class="accent">
