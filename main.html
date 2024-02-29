@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<!--
+    ParksideWeb
+    Copyright (c) Benedikt Müssig, 2024
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>ParksideWeb</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="application/javascript">
+        let config = {};
+        let data = {time: 0};
+
+        function initialize() {
+            console.log("Fetching configuration...")
+
+            let xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener("error", function(e) {
+                console.log("Could not fetch configuration", e);
+                setTimeout(initialize, 500);
+            });
+
+            xhr.addEventListener("load", function(e) {
+                try {
+                    config = JSON.parse(this.responseText);
+                } catch (e) {
+                    console.log("Could not parse configuration", e, this.responseText);
+                    setTimeout(initialize, 500);
+                    return;
+                }
+                console.log("Configuration fetched and parsed", config);
+
+                console.log("Applying values");
+                document.title = "ParksideWeb v" + config["version"] + " (" + config["port"] + ")";
+                if (config["whitelabel"] === true)
+                    info.classList.add("whitelabel");
+
+                setInterval(acquire, /*230*/ 1000);
+            });
+
+            xhr.open("GET", new URL("/config.json", window.location.href).toString());
+            xhr.setRequestHeader("Accept", "application/json");
+
+            xhr.send();
+        }
+
+        function acquire() {
+            console.log("Acquiring data...");
+
+            let xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener("error", function(e) {
+                console.log("Could not fetch data", e);
+            });
+
+            xhr.addEventListener("load", function(e) {
+                let oldTime = data["time"];
+
+                try {
+                    data = JSON.parse(this.responseText);
+                } catch (e) {
+                    console.log("Could not parse data", e, this.responseText);
+                    setTimeout(initialize, 500);
+                    return;
+                }
+                console.log("Data fetched and parsed", data);
+
+                if (oldTime > data["time"]) {
+                    console.log("Skipping stale data");
+                    return;
+                }
+
+                if (!data["valid"]) {
+                    console.log("Blanking invalid data");
+                    value.innerText = "";
+                    unit.innerText = "";
+                    mode.innerText = "";
+                    return;
+                }
+
+                console.log("Displaying data");
+                value.innerText = data["value"].toFixed(1); // TODO: either send string or number of digits
+                unit.innerText = data["unit"];
+                mode.innerText = data["mode"];
+            });
+
+            xhr.open("GET", new URL("/data.json", window.location.href).toString());
+            xhr.setRequestHeader("Accept", "application/json");
+
+            xhr.send();
+        }
+
+        window.addEventListener('load', initialize);
+    </script>
+</head>
+<body>
+    <table id="display">
+        <tr id="reading">
+            <td>
+                <span id="value"></span>
+                <span id="unit"></span>
+            </td>
+        </tr>
+        <tr class="accent">
+            <td id="mode"></td>
+        </tr>
+        <tr id="info">
+            <td>
+                ParksideWeb&nbsp;&copy;&nbsp;<a href="https://github.com/bmuessig/ParksideWeb">Benedikt M&uuml;ssig</a>,&nbsp;2024
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -1,0 +1,87 @@
+/*
+    ParksideWeb
+    Copyright (c) Benedikt Müssig, 2024
+ */
+
+@font-face {
+    font-family: 'Casper-Bold';
+    src:url('casper.woff') format('woff');
+}
+
+* {
+    font-family: "Casper-Bold", "Arial", "Helvetica", sans-serif;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #272829;
+}
+
+body, a, a:hover, a:visited {
+    color: #FFF6E0;
+}
+
+#display {
+    width: 100vw;
+    height: 100vh;
+    border: none;
+}
+
+.accent {
+    background-color: #61677A;
+}
+
+#reading, #mode, #info td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+#reading {
+    height: 60%;
+}
+
+#reading td {
+    padding-top: 5vh;
+}
+
+#value {
+    display: inline-block;
+    text-align: right;
+    font-size: 50vh;
+}
+
+#unit {
+    display: inline-block;
+    text-align: left;
+    font-size: 15vh;
+}
+
+#mode {
+    height: 30%;
+    font-size: 15vh;
+}
+
+#info td {
+    height: 10%;
+    font-size: 2vh;
+}
+
+#info.whitelabel {
+    display: none;
+}
+
+@media (prefers-color-scheme: light) {
+    body {
+        background-color: #FFF6E0;
+    }
+
+    body, a, a:hover, a:visited {
+        color: #272829;
+    }
+
+    .accent {
+        background-color: #D8D9DA;
+    }
+}
