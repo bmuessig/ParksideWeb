@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 //go:embed main.html style.css casper.woff favicon.ico
@@ -32,15 +33,13 @@ func Serve(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "application/json")
 
 		b, _ := json.Marshal(struct {
-			Version    string   `json:"version"`
-			Language   Language `json:"language"`
-			Whitelabel bool     `json:"whitelabel"`
-			Port       string   `json:"port"`
+			Version  string   `json:"version"`
+			Language Language `json:"language"`
+			Port     string   `json:"port"`
 		}{
-			Version:    "1.0",
-			Language:   LanguageEnglish,
-			Whitelabel: true,
-			Port:       "/dev/ttyUSB0",
+			Version:  "1.0",
+			Language: LanguageEnglish,
+			Port:     "/dev/ttyUSB0",
 		})
 
 		writer.WriteHeader(http.StatusOK)
@@ -58,19 +57,21 @@ func Serve(writer http.ResponseWriter, request *http.Request) {
 
 			mode, _ := reading.Mode.String(LanguageGerman)
 			c, _ := json.Marshal(struct {
-				Valid  bool    `json:"valid"`
-				Time   int64   `json:"time"`
-				Value  float64 `json:"value"`
-				Digits int     `json:"digits"`
-				Unit   string  `json:"unit"`
-				Mode   string  `json:"mode"`
+				Valid    bool    `json:"valid"`
+				Time     int64   `json:"time"`
+				Value    float64 `json:"value"`
+				Digits   int     `json:"digits"`
+				Unit     string  `json:"unit"`
+				Polarity string  `json:"polarity"`
+				Mode     string  `json:"mode"`
 			}{
-				Valid:  reading.Valid,
-				Time:   reading.Received.UnixMilli(),
-				Value:  reading.Value,
-				Digits: reading.Precision,
-				Unit:   string(reading.Unit) + "\n" + string(reading.Polarity),
-				Mode:   mode,
+				Valid:    reading.Valid && time.Now().Sub(reading.Received).Seconds() < 2,
+				Time:     reading.Received.UnixMilli(),
+				Value:    reading.Value,
+				Digits:   reading.Precision,
+				Unit:     string(reading.Unit),
+				Polarity: string(reading.Polarity),
+				Mode:     mode,
 			})
 			return c
 		}()

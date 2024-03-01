@@ -65,11 +65,7 @@ body, a, a:hover, a:visited {
 
 #info td {
     height: 10%;
-    font-size: 2vh;
-}
-
-#info.whitelabel {
-    display: none;
+    font-size: 5vh;
 }
 
 @media (prefers-color-scheme: light) {

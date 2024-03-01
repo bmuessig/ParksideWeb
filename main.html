@@ -32,15 +32,19 @@
                     document.title = "ParksideWeb v" + config["version"] + " (" + config["port"] + ")";
                     value.innerText = config["version"];
                     mode.innerText = config["port"];
-                    if (config["whitelabel"] === true)
-                        info.classList.add("whitelabel");
                 } catch (e) {
                     console.log("Could not parse configuration", e, this.responseText);
                     setTimeout(initialize, 500);
                     return;
                 }
 
-                setTimeout(function() { setInterval(acquire, interval); }, 1000);
+                setTimeout(function() {
+                    info.style.display = "none";
+                    value.innerText = "";
+                    unit.innerText = "";
+                    mode.innerText = "";
+                    setInterval(acquire, interval);
+                }, 5000);
             });
 
             xhr.open("GET", new URL("/config.json", window.location.href).toString());
@@ -85,7 +89,7 @@
 
                 console.log("Displaying data");
                 value.innerText = data["value"].toFixed(data["digits"]);
-                unit.innerText = data["unit"];
+                unit.innerText = data["unit"] + (data["polarity"].length > 0 ? "\n" + data["polarity"] : "");
                 mode.innerText = data["mode"];
             });
 
