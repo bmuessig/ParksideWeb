@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 )
@@ -11,6 +12,12 @@ import (
 var appFs embed.FS
 
 func Serve(writer http.ResponseWriter, request *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
+	}()
+
 	// Allow access from anywhere
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
 	writer.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
@@ -55,9 +62,11 @@ func Serve(writer http.ResponseWriter, request *http.Request) {
 			mutex.RLock()
 			defer mutex.RUnlock()
 
-			mode, _ := reading.Mode.String(LanguageGerman)
+			mode, _ := reading.Mode.String(language)
+			stale := time.Now().Sub(reading.Received).Seconds() >= 2
 			c, _ := json.Marshal(struct {
-				Valid    bool    `json:"valid"`
+				Recorded bool    `json:"recorded"`
+				Overload bool    `json:"overload"`
 				Time     int64   `json:"time"`
 				Value    float64 `json:"value"`
 				Needle   int     `json:"needle"`
@@ -66,7 +75,8 @@ func Serve(writer http.ResponseWriter, request *http.Request) {
 				Polarity string  `json:"polarity"`
 				Mode     string  `json:"mode"`
 			}{
-				Valid:    reading.Valid && time.Now().Sub(reading.Received).Seconds() < 2,
+				Recorded: reading.Valid && reading.Recorded && !stale,
+				Overload: reading.Overload,
 				Time:     reading.Received.UnixMilli(),
 				Value:    reading.Absolute,
 				Needle:   int(reading.Relative * 100),

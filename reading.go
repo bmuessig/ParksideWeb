@@ -37,6 +37,7 @@ type Attributes struct {
 type Reading struct {
 	Received time.Time
 	Valid    bool
+	Overload bool
 	Attributes
 	Absolute float64
 	Relative float64

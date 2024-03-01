@@ -102,7 +102,6 @@ func (m *Multimeter) Receive() (r Reading, err error) {
 		return
 	default:
 		m.sync = false
-		r.Received = time.Now()
 	}
 
 	var buf = make([]byte, 8)
@@ -110,6 +109,7 @@ func (m *Multimeter) Receive() (r Reading, err error) {
 	if n, err = io.ReadFull(m.serial, buf); err != nil {
 		return
 	}
+	r.Received = time.Now()
 	fmt.Println(n, buf)
 
 	var actualChecksum uint16
@@ -124,11 +124,13 @@ func (m *Multimeter) Receive() (r Reading, err error) {
 	fmt.Printf("%x\n", uint16(buf[1])<<8|uint16(buf[2]))
 
 	r.Attributes = Range(uint16(buf[1])<<8 | uint16(buf[2])).Attributes()
-	if r.Recorded {
+	if r.Recorded && r.Maximum > r.Minimum {
 		raw := int16(uint16(buf[4])<<8 | uint16(buf[5]))
-		r.Absolute = float64(raw) * math.Pow10(-r.Precision)
-		if r.Maximum > r.Minimum {
-			r.Relative = float64(raw-r.Minimum) / float64(r.Maximum-r.Minimum)
+		r.Relative = math.Max(math.Min(float64(raw-r.Minimum)/float64(r.Maximum-r.Minimum), 1), 0)
+		if raw >= r.Minimum && raw <= r.Maximum {
+			r.Absolute = float64(raw) * math.Pow10(-r.Precision)
+		} else {
+			r.Overload = true
 		}
 	}
 	return

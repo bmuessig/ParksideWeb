@@ -80,19 +80,17 @@
                     return;
                 }
 
-                if (!data["valid"]) {
-                    console.log("Blanking invalid data");
+                console.log("Displaying data");
+                mode.innerText = data["mode"];
+                if (data["recorded"]) {
+                    value.innerText = data["overload"] ? "OL" : data["value"].toFixed(data["digits"]);
+                    unit.innerText = data["unit"] + (data["polarity"].length > 0 ? "\n" + data["polarity"] : "");
+                    needle.style.width = data["needle"] + "%";
+                } else {
                     value.innerText = "";
                     unit.innerText = "";
-                    mode.innerText = data["mode"];
-                    return;
+                    needle.style.width = "0";
                 }
-
-                console.log("Displaying data");
-                value.innerText = data["value"].toFixed(data["digits"]);
-                unit.innerText = data["unit"] + (data["polarity"].length > 0 ? "\n" + data["polarity"] : "");
-                needle.style.width = data["needle"] + "%";
-                mode.innerText = data["mode"];
             });
 
             xhr.open("GET", new URL("/data.json", window.location.href).toString());
