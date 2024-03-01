@@ -13,8 +13,6 @@ const (
 	RangeF uint16 = 0x20
 	RangeG uint16 = 0x40
 
-	RangeBooting Range = 0x0
-
 	RangeVoltageDc  Range = 0x16 << 8
 	RangeVoltageDcB       = RangeVoltageDc | Range(RangeB) // mV DC [000.0] E-1
 	RangeVoltageDcC       = RangeVoltageDc | Range(RangeC) //  V DC [0.000] E-3
@@ -69,8 +67,6 @@ func (r Range) Attributes() (a Attributes) {
 	}
 
 	switch r & RangeMask {
-	case RangeBooting:
-		a.Mode = ModeBooting
 	case RangeVoltageDc:
 		a.Mode = ModeVoltage
 		a.Polarity = PolarityDC

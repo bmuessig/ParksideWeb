@@ -60,10 +60,15 @@ func (m *Multimeter) Synchronize() (ok bool, err error) {
 		err = fmt.Errorf("the port is not open")
 	}
 
+	if err = m.serial.ResetInputBuffer(); err != nil {
+		return
+	}
+
 	var buf = make([]byte, 1)
 	var tail bool
 	var retry int
-	for retry = 10; retry > 0; retry-- {
+	m.sync = false
+	for retry = 0; retry < 11; retry++ {
 		n := 0
 		n, err = m.serial.Read(buf)
 		switch {
@@ -78,7 +83,8 @@ func (m *Multimeter) Synchronize() (ok bool, err error) {
 				continue
 			}
 			ok = true
-			break
+			m.sync = true
+			return
 		default:
 			tail = false
 		}
@@ -100,18 +106,22 @@ func (m *Multimeter) Receive() (r Reading, err error) {
 	}
 
 	var buf = make([]byte, 8)
-	if _, err = io.ReadFull(m.serial, buf); err != nil {
+	var n int
+	if n, err = io.ReadFull(m.serial, buf); err != nil {
 		return
 	}
+	fmt.Println(n, buf)
 
 	var actualChecksum uint16
 	var expectedChecksum = (uint16(buf[6]) << 8) | uint16(buf[7])
 	for i := 0; i <= 5; i++ {
 		actualChecksum += uint16(buf[i])
 	}
-	if actualChecksum != expectedChecksum {
+	if r.Valid = actualChecksum == expectedChecksum; !r.Valid {
 		return
 	}
+
+	fmt.Printf("%x\n", uint16(buf[1])<<8|uint16(buf[2]))
 
 	r.Attributes = Range(uint16(buf[1])<<8 | uint16(buf[2])).Attributes()
 	if r.Recorded {
