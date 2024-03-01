@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script type="application/javascript">
-        const interval = 1000; //230;
+        const interval = 225;
         let config = {};
         let data = {time: 0};
 
@@ -79,12 +79,12 @@
                     console.log("Blanking invalid data");
                     value.innerText = "";
                     unit.innerText = "";
-                    mode.innerText = "";
+                    mode.innerText = data["mode"];
                     return;
                 }
 
                 console.log("Displaying data");
-                value.innerText = data["value"].toFixed(1); // TODO: either send string or number of digits
+                value.innerText = data["value"].toFixed(data["digits"]);
                 unit.innerText = data["unit"];
                 mode.innerText = data["mode"];
             });
