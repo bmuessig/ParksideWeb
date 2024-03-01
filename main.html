@@ -40,7 +40,7 @@
                     return;
                 }
 
-                setInterval(acquire, interval);
+                setTimeout(function() { setInterval(acquire, interval); }, 1000);
             });
 
             xhr.open("GET", new URL("/config.json", window.location.href).toString());
