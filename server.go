@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"encoding/json"
-	"math/rand"
 	"net/http"
 )
 
@@ -53,24 +52,28 @@ func Serve(writer http.ResponseWriter, request *http.Request) {
 	case "data.json", "/data.json":
 		writer.Header().Set("Content-Type", "application/json")
 
-		val := (float64)(rand.Int()%10000) / 10
-		if (rand.Int() % 2) == 0 {
-			val = -val
-		}
+		b := func() []byte {
+			mutex.RLock()
+			defer mutex.RUnlock()
 
-		b, _ := json.Marshal(struct {
-			Valid bool    `json:"valid"`
-			Time  int64   `json:"time"`
-			Value float64 `json:"value"`
-			Unit  string  `json:"unit"`
-			Mode  string  `json:"mode"`
-		}{
-			Valid: true,
-			Time:  0,
-			Value: val,
-			Unit:  "mV\nDC",
-			Mode:  Translations[LanguageGerman][TranslationVoltage],
-		})
+			mode, _ := reading.Mode.String(LanguageGerman)
+			c, _ := json.Marshal(struct {
+				Valid  bool    `json:"valid"`
+				Time   int64   `json:"time"`
+				Value  float64 `json:"value"`
+				Digits int     `json:"digits"`
+				Unit   string  `json:"unit"`
+				Mode   string  `json:"mode"`
+			}{
+				Valid:  reading.Valid,
+				Time:   reading.Received.UnixMilli(),
+				Value:  reading.Value,
+				Digits: reading.Precision,
+				Unit:   string(reading.Unit) + "\n" + string(reading.Polarity),
+				Mode:   mode,
+			})
+			return c
+		}()
 
 		writer.WriteHeader(http.StatusOK)
 		writer.Write(b)
