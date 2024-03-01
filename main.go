@@ -1,10 +1,14 @@
 package main
 
 import (
+	"github.com/pkg/browser"
+	"log"
+	"net"
+)
+import (
 	"fmt"
 	"net/http"
 	"sync"
-	"time"
 )
 
 /*
@@ -19,23 +23,17 @@ import (
 	-h help
 */
 
-var (
-	openBrowser   bool
-	language      string
-	serialPort    string
-	serialBitrate int
-	serverPort    int
-	whiteLabel    bool
-	csvOutput     bool
-	duration      time.Duration
-)
-
 var reading = &Reading{}
 var mutex = &sync.RWMutex{}
 
 func main() {
+	serialPort = "/dev/cu.usbmodem143301"
+	serialBitrate = 2400
+	language = LanguageEnglish
+	openBrowser = true
+
 	go func() {
-		m := NewMultimeter("/dev/cu.usbmodem143301", 2400, 1*time.Second)
+		m := NewMultimeter(serialPort, serialBitrate, timeout)
 		err := m.Connect()
 		if err != nil {
 			panic(err)
@@ -77,6 +75,20 @@ func main() {
 		}
 	}()
 
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
+	if err != nil {
+		panic(err)
+	}
+
+	port := listener.Addr().(*net.TCPAddr).Port
+	fmt.Println("Using port:", port)
+
+	if openBrowser {
+		browser.Stdout = log.Writer()
+		browser.Stderr = browser.Stdout
+		browser.OpenURL(fmt.Sprintf("http://localhost:%d", port))
+	}
+
 	http.HandleFunc("/", Serve)
-	http.ListenAndServe(":8080", nil)
+	http.Serve(listener, nil)
 }

@@ -44,9 +44,9 @@ func Serve(writer http.ResponseWriter, request *http.Request) {
 			Language Language `json:"language"`
 			Port     string   `json:"port"`
 		}{
-			Version:  "1.0",
-			Language: LanguageEnglish,
-			Port:     "/dev/ttyUSB0",
+			Version:  version,
+			Language: language,
+			Port:     serialPort,
 		})
 
 		writer.WriteHeader(http.StatusOK)
