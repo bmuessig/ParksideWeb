@@ -30,11 +30,14 @@ type Attributes struct {
 	Unit      Unit
 	Recorded  bool
 	Precision int
+	Minimum   int16
+	Maximum   int16
 }
 
 type Reading struct {
 	Received time.Time
 	Valid    bool
 	Attributes
-	Value float64
+	Absolute float64
+	Relative float64
 }

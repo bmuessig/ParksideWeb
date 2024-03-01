@@ -64,6 +64,8 @@ func (r Range) Attributes() (a Attributes) {
 		Unit:      UnitNone,
 		Recorded:  true,
 		Precision: 0,
+		Minimum:   -1999,
+		Maximum:   1999,
 	}
 
 	switch r & RangeMask {
@@ -75,6 +77,7 @@ func (r Range) Attributes() (a Attributes) {
 		a.Mode = ModeVoltage
 		a.Polarity = PolarityAC
 		a.Unit = UnitVolt
+		a.Minimum = 0
 	case RangeCurrent:
 		a.Mode = ModeCurrent
 		a.Unit = UnitAmpere
@@ -87,12 +90,15 @@ func (r Range) Attributes() (a Attributes) {
 	case RangeResistance:
 		a.Mode = ModeResistance
 		a.Unit = UnitOhm
+		a.Minimum = 0
 	case RangeContinuity:
 		a.Mode = ModeContinuity
 		a.Unit = UnitOhm
+		a.Minimum = 0
 	case RangeDiode:
 		a.Mode = ModeDiode
 		a.Unit = UnitVolt
+		a.Minimum = 0
 	case RangeSquareWave:
 		a.Mode = ModeSquareWave
 	}
@@ -109,6 +115,8 @@ func (r Range) Attributes() (a Attributes) {
 		a.Precision = 1
 	case RangeVoltageDcF:
 		a.Precision = 0
+		a.Minimum = -300
+		a.Maximum = 300
 	case RangeVoltageAcC:
 		a.Precision = 3
 	case RangeVoltageAcD:
@@ -117,10 +125,13 @@ func (r Range) Attributes() (a Attributes) {
 		a.Precision = 1
 	case RangeVoltageAcF:
 		a.Precision = 0
+		a.Maximum = 300
 	case RangeCurrentF:
 		a.Precision = 3
 	case RangeCurrentG:
 		a.Precision = 2
+		a.Minimum = -1000
+		a.Maximum = 1000
 	case RangeCurrentMilliD:
 		a.Precision = 2
 	case RangeCurrentMilliE:
@@ -154,6 +165,8 @@ func (r Range) Attributes() (a Attributes) {
 		a.Precision = 3
 	default:
 		a.Recorded = false
+		a.Minimum = 0
+		a.Maximum = 0
 	}
 	return
 }

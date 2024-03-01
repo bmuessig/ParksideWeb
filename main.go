@@ -62,7 +62,7 @@ func main() {
 				continue
 			case r.Recorded:
 				mode, _ := r.Mode.String(LanguageEnglish)
-				fmt.Printf("%v (%s): %f%s%s\n", r.Received, mode, r.Value, r.Unit, r.Polarity)
+				fmt.Printf("%v (%s): %f%s%s %f%%\n", r.Received, mode, r.Absolute, r.Unit, r.Polarity, r.Relative*100)
 			default:
 				mode, _ := r.Mode.String(LanguageEnglish)
 				fmt.Printf("%v (%s): %s%s\n", r.Received, mode, r.Unit, r.Polarity)

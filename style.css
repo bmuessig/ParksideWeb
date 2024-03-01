@@ -58,6 +58,18 @@ body, a, a:hover, a:visited {
     font-size: 15vh;
 }
 
+#bargraph {
+    display: none;
+    height: 5%;
+}
+
+#needle {
+    display: inline-block;
+    background-color: #FFF6E0;
+    height: 100%;
+    width: 0;
+}
+
 #mode {
     height: 30%;
     font-size: 15vh;
@@ -79,5 +91,9 @@ body, a, a:hover, a:visited {
 
     .accent {
         background-color: #D8D9DA;
+    }
+
+    #needle {
+        background-color: #272829;
     }
 }

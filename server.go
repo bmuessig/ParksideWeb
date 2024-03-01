@@ -60,6 +60,7 @@ func Serve(writer http.ResponseWriter, request *http.Request) {
 				Valid    bool    `json:"valid"`
 				Time     int64   `json:"time"`
 				Value    float64 `json:"value"`
+				Needle   int     `json:"needle"`
 				Digits   int     `json:"digits"`
 				Unit     string  `json:"unit"`
 				Polarity string  `json:"polarity"`
@@ -67,7 +68,8 @@ func Serve(writer http.ResponseWriter, request *http.Request) {
 			}{
 				Valid:    reading.Valid && time.Now().Sub(reading.Received).Seconds() < 2,
 				Time:     reading.Received.UnixMilli(),
-				Value:    reading.Value,
+				Value:    reading.Absolute,
+				Needle:   int(reading.Relative * 100),
 				Digits:   reading.Precision,
 				Unit:     string(reading.Unit),
 				Polarity: string(reading.Polarity),

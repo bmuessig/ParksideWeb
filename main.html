@@ -42,6 +42,7 @@
                     info.style.display = "none";
                     value.innerText = "";
                     unit.innerText = "";
+                    bargraph.style.display = "table-row";
                     mode.innerText = "";
                     setInterval(acquire, interval);
                 }, 5000);
@@ -90,6 +91,7 @@
                 console.log("Displaying data");
                 value.innerText = data["value"].toFixed(data["digits"]);
                 unit.innerText = data["unit"] + (data["polarity"].length > 0 ? "\n" + data["polarity"] : "");
+                needle.style.width = data["needle"] + "%";
                 mode.innerText = data["mode"];
             });
 
@@ -109,6 +111,9 @@
                 <span id="value"></span>
                 <span id="unit">ParksideWeb</span>
             </td>
+        </tr>
+        <tr id="bargraph">
+            <td><span id="needle"></span></td>
         </tr>
         <tr class="accent">
             <td id="mode"></td>

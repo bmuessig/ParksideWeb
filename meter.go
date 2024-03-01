@@ -125,7 +125,11 @@ func (m *Multimeter) Receive() (r Reading, err error) {
 
 	r.Attributes = Range(uint16(buf[1])<<8 | uint16(buf[2])).Attributes()
 	if r.Recorded {
-		r.Value = float64(int16(uint16(buf[4])<<8|uint16(buf[5]))) * math.Pow10(-r.Precision)
+		raw := int16(uint16(buf[4])<<8 | uint16(buf[5]))
+		r.Absolute = float64(raw) * math.Pow10(-r.Precision)
+		if r.Maximum > r.Minimum {
+			r.Relative = float64(raw-r.Minimum) / float64(r.Maximum-r.Minimum)
+		}
 	}
 	return
 }
