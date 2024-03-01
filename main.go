@@ -24,7 +24,7 @@ var (
 	serialBitrate int
 	serverPort    int
 	whiteLabel    bool
-	jsonOutput    bool
+	csvOutput     bool
 	duration      time.Duration
 )
 
