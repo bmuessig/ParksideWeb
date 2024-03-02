@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"math"
+	"sync"
 	"time"
 )
 import "go.bug.st/serial"
@@ -52,6 +54,79 @@ func (m *Multimeter) Disconnect() (err error) {
 
 	err = m.serial.Close()
 	m.serial = nil
+	return
+}
+
+func (m *Multimeter) Listen() (read func() Reading, stop func(), err error) {
+	if err = m.Connect(); err != nil {
+		return
+	}
+
+	reading := &Reading{}
+	readMutex := &sync.RWMutex{}
+	read = func() Reading {
+		readMutex.RLock()
+		defer readMutex.RUnlock()
+		return *reading
+	}
+
+	stopReq := make(chan struct{})
+	stopOk := make(chan struct{})
+	stop = func() {
+		stopReq <- struct{}{}
+		<-stopOk
+	}
+
+	go func() {
+		defer func() {
+			if err := m.Disconnect(); err != nil {
+				log.Println(err)
+			}
+
+			log.Println("Stopped multimeter")
+			stopOk <- struct{}{}
+			close(stopOk)
+		}()
+		log.Printf("Start reading multimeter on %s at %d bps", m.port, m.mode.BaudRate)
+
+		for {
+			select {
+			case <-stopReq:
+				log.Println("Stopping multimeter")
+				return
+			default:
+			}
+
+			var ok bool
+			if ok, err = m.Synchronize(); err != nil {
+				panic(err)
+			} else if !ok {
+				log.Println("Failed to synchronize multimeter")
+				continue
+			}
+
+			var r Reading
+			if r, err = m.Receive(); err != nil {
+				panic(err)
+			}
+
+			switch {
+			case !r.Valid:
+				log.Printf("Invalid multimeter packet: %+v", r)
+				continue
+			case r.Recorded:
+				log.Printf("Multimeter packet (%s): %.3f%s%s %.1f%%", r.Mode.Translation(), r.Absolute, r.Unit, r.Polarity, r.Relative*100)
+			default:
+				log.Printf("Multimeter packet (%s): %s%s", r.Mode.Translation(), r.Unit, r.Polarity)
+			}
+
+			func() {
+				readMutex.Lock()
+				defer readMutex.Unlock()
+				*reading = r
+			}()
+		}
+	}()
 	return
 }
 
@@ -105,12 +180,10 @@ func (m *Multimeter) Receive() (r Reading, err error) {
 	}
 
 	var buf = make([]byte, 8)
-	var n int
-	if n, err = io.ReadFull(m.serial, buf); err != nil {
+	if _, err = io.ReadFull(m.serial, buf); err != nil {
 		return
 	}
 	r.Received = time.Now()
-	fmt.Println(n, buf)
 
 	var actualChecksum uint16
 	var expectedChecksum = (uint16(buf[6]) << 8) | uint16(buf[7])
@@ -120,8 +193,6 @@ func (m *Multimeter) Receive() (r Reading, err error) {
 	if r.Valid = actualChecksum == expectedChecksum; !r.Valid {
 		return
 	}
-
-	fmt.Printf("%x\n", uint16(buf[1])<<8|uint16(buf[2]))
 
 	r.Attributes = Range(uint16(buf[1])<<8 | uint16(buf[2])).Attributes()
 	if r.Recorded && r.Maximum > r.Minimum {

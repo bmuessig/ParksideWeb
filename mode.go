@@ -13,8 +13,7 @@ const (
 	ModeSquareWave
 )
 
-func (m Mode) String(l Language) (s string, ok bool) {
-	var t Translation
+func (m Mode) Translation() (t Translation) {
 	switch m {
 	case ModeVoltage:
 		t = TranslationVoltage
@@ -31,7 +30,5 @@ func (m Mode) String(l Language) (s string, ok bool) {
 	default:
 		t = TranslationUnknown
 	}
-
-	s, ok = Translations[l][t]
 	return
 }

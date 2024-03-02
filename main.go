@@ -1,14 +1,19 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"github.com/pkg/browser"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 import (
 	"fmt"
 	"net/http"
-	"sync"
 )
 
 /*
@@ -23,57 +28,15 @@ import (
 	-h help
 */
 
-var reading = &Reading{}
-var mutex = &sync.RWMutex{}
-
 func main() {
 	serialPort = "/dev/cu.usbmodem143301"
 	serialBitrate = 2400
 	language = LanguageEnglish
 	openBrowser = true
 
-	go func() {
-		m := NewMultimeter(serialPort, serialBitrate, timeout)
-		err := m.Connect()
-		if err != nil {
-			panic(err)
-		}
-		defer m.Disconnect()
-
-		for {
-			var ok bool
-			if ok, err = m.Synchronize(); err != nil {
-				panic(err)
-			} else if !ok {
-				fmt.Println("Sync failed")
-				continue
-			}
-
-			var r Reading
-			if r, err = m.Receive(); err != nil {
-				panic(err)
-			}
-
-			switch {
-			case !r.Valid:
-				fmt.Printf("%v: Invalid packet\n", r.Received)
-				continue
-			case r.Recorded:
-				mode, _ := r.Mode.String(LanguageEnglish)
-				fmt.Printf("%v (%s): %f%s%s %f%%\n", r.Received, mode, r.Absolute, r.Unit, r.Polarity, r.Relative*100)
-			default:
-				mode, _ := r.Mode.String(LanguageEnglish)
-				fmt.Printf("%v (%s): %s%s\n", r.Received, mode, r.Unit, r.Polarity)
-			}
-
-			func() {
-				mutex.Lock()
-				defer mutex.Unlock()
-
-				*reading = r
-			}()
-		}
-	}()
+	server := &http.Server{
+		Addr: ":8080",
+	}
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", serverPort))
 	if err != nil {
@@ -81,7 +44,22 @@ func main() {
 	}
 
 	port := listener.Addr().(*net.TCPAddr).Port
-	fmt.Println("Using port:", port)
+	log.Println("Using port:", port)
+
+	multimeter := NewMultimeter(serialPort, serialBitrate, timeout)
+	var getReading func() Reading
+	var stopReading func()
+	if getReading, stopReading, err = multimeter.Listen(); err != nil {
+		return
+	}
+
+	server.Handler = NewHandler(getReading)
+	go func() {
+		if err := server.Serve(listener); !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("Could start HTTP server: %v", err)
+		}
+		log.Println("Stopped serving new HTTP requests")
+	}()
 
 	if openBrowser {
 		browser.Stdout = log.Writer()
@@ -89,6 +67,20 @@ func main() {
 		browser.OpenURL(fmt.Sprintf("http://localhost:%d", port))
 	}
 
-	http.HandleFunc("/", Serve)
-	http.Serve(listener, nil)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Printf("Could not stop HTTP server: %v", err)
+		if err := server.Close(); err != nil {
+			log.Printf("Could not force-stop HTTP server: %v", err)
+		}
+	}
+
+	stopReading()
+	log.Println("Shutdown complete")
 }
