@@ -63,6 +63,6 @@ See <https://github.com/bmuessig/ParksideView> for more details on the simple mo
 -l en,de,pt,fr  language for CSV and display (default en)
 -n              disable the HTTP server
 -o              open the live display in a browser
--p <port>       name or path of the serial port
--s int          choose a static port number over a free port (default auto)
+-p <port name>  name or path of the serial port
+-s <TCP port>   choose a static port number over a free port (default auto)
 ```
