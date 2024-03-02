@@ -51,6 +51,11 @@ Starts the web-server on port 8080 instead of on a free port and does not open t
 
 Prints a list of all available serial ports.
 
+### List supported flags
+`./ParksideWeb -h`
+
+Prints a short overview of all supported flags.
+
 ## Hardware modifications
 See <https://github.com/bmuessig/ParksideView> for more details on the simple modification required.
 
