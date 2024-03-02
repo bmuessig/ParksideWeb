@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"io"
 	"log"
 	"math"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -57,7 +59,7 @@ func (m *Multimeter) Disconnect() (err error) {
 	return
 }
 
-func (m *Multimeter) Listen() (read func() Reading, stop func(), err error) {
+func (m *Multimeter) Listen(output *csv.Writer) (read func() Reading, stop func(), err error) {
 	if err = m.Connect(); err != nil {
 		return
 	}
@@ -125,6 +127,27 @@ func (m *Multimeter) Listen() (read func() Reading, stop func(), err error) {
 				defer readMutex.Unlock()
 				*reading = r
 			}()
+
+			// date, mode, rel, abs, unit, polarity
+			if output != nil && r.Valid && r.Recorded && !r.Overload {
+				if err = output.Write([]string{
+					r.Received.String(),
+					Translations[language][r.Mode.Translation()],
+					strconv.FormatFloat(r.Relative, 'g', 3, 64),
+					strconv.FormatFloat(r.Absolute, 'f', r.Precision, 64),
+					string(r.Unit),
+					string(r.Polarity),
+				}); err != nil {
+					log.Printf("Could not write CSV: %v", err)
+					continue
+				}
+
+				output.Flush()
+				if err = output.Error(); err != nil {
+					log.Printf("Could not flush CSV: %v", err)
+					continue
+				}
+			}
 		}
 	}()
 	return

@@ -19,6 +19,12 @@ const (
 	TranslationDiode      Translation = "diode"
 	TranslationContinuity Translation = "continuity"
 	TranslationCurrent    Translation = "current"
+	TranslationDate       Translation = "date"
+	TranslationMode       Translation = "mode"
+	TranslationRelative   Translation = "relative"
+	TranslationAbsolute   Translation = "absolute"
+	TranslationUnit       Translation = "unit"
+	TranslationPolarity   Translation = "polarity"
 )
 
 var Translations = map[Language]map[Translation]string{
@@ -30,6 +36,12 @@ var Translations = map[Language]map[Translation]string{
 		TranslationDiode:      "Diode",
 		TranslationContinuity: "Continuity",
 		TranslationCurrent:    "Current",
+		TranslationDate:       "Date",
+		TranslationMode:       "Mode",
+		TranslationRelative:   "Relative",
+		TranslationAbsolute:   "Absolute",
+		TranslationUnit:       "Unit",
+		TranslationPolarity:   "Polarity",
 	},
 	LanguageGerman: {
 		TranslationUnknown:    "Unbekannt",
@@ -39,6 +51,12 @@ var Translations = map[Language]map[Translation]string{
 		TranslationDiode:      "Diode",
 		TranslationContinuity: "Kontinuität",
 		TranslationCurrent:    "Strom",
+		TranslationDate:       "Datum",
+		TranslationMode:       "Modus",
+		TranslationRelative:   "Relativ",
+		TranslationAbsolute:   "Absolut",
+		TranslationUnit:       "Einheit",
+		TranslationPolarity:   "Polarität",
 	},
 	LanguagePortuguese: {
 		TranslationUnknown:    "Desconhecido",
@@ -48,6 +66,12 @@ var Translations = map[Language]map[Translation]string{
 		TranslationDiode:      "Díodo",
 		TranslationContinuity: "Continuidade",
 		TranslationCurrent:    "Corrente",
+		TranslationDate:       "Data",
+		TranslationMode:       "Modo",
+		TranslationRelative:   "Relativo",
+		TranslationAbsolute:   "Absoluto",
+		TranslationUnit:       "Unidade",
+		TranslationPolarity:   "Polaridade",
 	},
 	LanguageFrench: {
 		TranslationUnknown:    "Inconnu",
@@ -57,5 +81,11 @@ var Translations = map[Language]map[Translation]string{
 		TranslationDiode:      "Diode",
 		TranslationContinuity: "Continuité",
 		TranslationCurrent:    "Courant",
+		TranslationDate:       "Date",
+		TranslationMode:       "Mode",
+		TranslationRelative:   "Relatif",
+		TranslationAbsolute:   "Absolu",
+		TranslationUnit:       "Unité",
+		TranslationPolarity:   "Polarité",
 	},
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"errors"
 	"github.com/pkg/browser"
 	"go.bug.st/serial"
@@ -33,11 +34,6 @@ func main() {
 		return
 	}
 
-	var durationExpired <-chan time.Time
-	if duration != 0 {
-		durationExpired = time.NewTimer(duration).C
-	}
-
 	log.Printf("ParksideWeb v%s", version)
 	log.Println("(c) Benedikt Muessig, 2024")
 	log.Println("https://github.com/bmuessig/ParksideWeb")
@@ -46,11 +42,32 @@ func main() {
 		return
 	}
 
+	var durationExpired <-chan time.Time
+	if duration != 0 {
+		durationExpired = time.NewTimer(duration).C
+	}
+
+	var csvWriter *csv.Writer
+	if csvOutput {
+		csvWriter = csv.NewWriter(os.Stdout)
+		if err := csvWriter.Write([]string{
+			Translations[language][TranslationDate],
+			Translations[language][TranslationMode],
+			Translations[language][TranslationRelative],
+			Translations[language][TranslationAbsolute],
+			Translations[language][TranslationUnit],
+			Translations[language][TranslationPolarity],
+		}); err != nil {
+			log.Printf("Could not write CSV: %v", err)
+			return
+		}
+	}
+
 	multimeter := NewMultimeter(serialPort, serialBitrate, timeout)
 	var err error
 	var getReading func() Reading
 	var stopReading func()
-	if getReading, stopReading, err = multimeter.Listen(); err != nil {
+	if getReading, stopReading, err = multimeter.Listen(csvWriter); err != nil {
 		log.Printf("Could not start multimeter: %v", err)
 		return
 	}
@@ -98,8 +115,13 @@ func main() {
 				log.Printf("Could not force-stop HTTP server: %v", err)
 			}
 		}
-	} else if durationExpired != nil {
-		<-durationExpired
+	} else {
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+		select {
+		case <-sigChan:
+		case <-durationExpired:
+		}
 	}
 
 	stopReading()
