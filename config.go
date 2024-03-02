@@ -35,7 +35,7 @@ func ParseFlags() {
 
 	l := flag.String("l", "en", "language for CSV and display (en,de,pt,fr)")
 	flag.BoolVar(&csvOutput, "c", false, "enable CSV output on standard output")
-	flag.DurationVar(&duration, "d", 0, "choose a acquisition duration over unlimited")
+	flag.DurationVar(&duration, "d", 0, "set an acquisition duration instead of endless")
 	flag.Parse()
 
 	language = LanguageEnglish
