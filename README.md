@@ -15,7 +15,7 @@ It supports both command-line and browser based operation and is the modern rewr
 - Duration of the acquisition can be limited, if desired
 - Display and CSV translations available for German, English, French and Portuguese
 - Automatic dark and light modes of the display included
-- Embedded web-server and web-application in a self-contained ~8 MB executable
+- Embedded web-server and web-application in a self-contained ~5 MB executable
 - Can be used from the command-line exclusively, if desired
 - Browser can be opened automatically on the URL of the display
 - Enumeration of all available serial ports and no parameters except port name/path required
@@ -56,13 +56,13 @@ See <https://github.com/bmuessig/ParksideView> for more details on the simple mo
 
 ## Command-line
 ```
--b <int>        override the default serial port bitrate (default 2400)
--c              enable CSV output on standard output
--d <duration>   set an acquisition duration instead of endless (default endless)
--e              enumerate all serial ports then exit
--l en,de,pt,fr  language for CSV and display (default en)
--n              disable the HTTP server
--o              open the live display in a browser
--p <port name>  name or path of the serial port
--s <TCP port>   choose a static port number over a free port (default auto)
+-b <bitrate>      override the default serial port bitrate (default 2400)
+-c                enable CSV output on standard output
+-d <duration>     set an acquisition duration instead of endless (default endless)
+-e                enumerate all serial ports then exit
+-l <en,de,pt,fr>  language for CSV and display (default en)
+-n                disable the HTTP server
+-o                open the live display in a browser
+-p <port name>    name or path of the serial port
+-s <TCP port>     choose a static port number over a free port (default auto)
 ```

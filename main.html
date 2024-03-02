@@ -16,7 +16,7 @@
         let data = {time: 0};
 
         function initialize() {
-            console.log("Fetching configuration...")
+            console.log("Fetching configuration")
 
             let xhr = new XMLHttpRequest();
 
@@ -55,7 +55,7 @@
         }
 
         function acquire() {
-            console.log("Acquiring data...");
+            console.log("Acquiring data");
 
             let xhr = new XMLHttpRequest();
 
@@ -63,7 +63,7 @@
                 console.log("Could not fetch data", e);
             });
 
-            xhr.addEventListener("load", function(e) {
+            xhr.addEventListener("load", function() {
                 let oldTime = data["time"];
 
                 try {

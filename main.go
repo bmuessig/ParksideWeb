@@ -38,7 +38,7 @@ func main() {
 	log.Println("(c) Benedikt Muessig, 2024")
 	log.Println("https://github.com/bmuessig/ParksideWeb")
 	if serialPort == "" {
-		log.Println("No serial port with specified (e.g. -s COM1 or /dev/ttyUSB0)")
+		log.Println("No serial port specified (e.g. -s COM1 or /dev/ttyUSB0)")
 		return
 	}
 
