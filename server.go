@@ -47,7 +47,7 @@ func (s *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	case "config.json", "/config.json":
 		writer.Header().Set("Content-Type", "application/json")
 
-		b, _ := json.Marshal(struct {
+		b, err := json.Marshal(struct {
 			Version  string   `json:"version"`
 			Language Language `json:"language"`
 			Port     string   `json:"port"`
@@ -56,11 +56,16 @@ func (s *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 			Language: language,
 			Port:     serialPort,
 		})
+		if err != nil {
+			log.Printf("could not marshal JSON: %v", err)
+			return
+		}
 
 		writer.WriteHeader(http.StatusOK)
-		writer.Write(b)
-
-		// todo
+		if _, err = writer.Write(b); err != nil {
+			log.Printf("could not write response: %v", err)
+			return
+		}
 		return
 
 	case "data.json", "/data.json":
@@ -69,7 +74,7 @@ func (s *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 		reading := s.read()
 		mode := Translations[language][reading.Mode.Translation()]
 		stale := time.Now().Sub(reading.Received).Seconds() >= 2
-		b, _ := json.Marshal(struct {
+		b, err := json.Marshal(struct {
 			Recorded bool    `json:"recorded"`
 			Overload bool    `json:"overload"`
 			Time     int64   `json:"time"`
@@ -90,11 +95,16 @@ func (s *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 			Polarity: string(reading.Polarity),
 			Mode:     mode,
 		})
+		if err != nil {
+			log.Printf("could not marshal JSON: %v", err)
+			return
+		}
 
 		writer.WriteHeader(http.StatusOK)
-		writer.Write(b)
-
-		// todo
+		if _, err = writer.Write(b); err != nil {
+			log.Printf("could not write response: %v", err)
+			return
+		}
 		return
 	}
 
