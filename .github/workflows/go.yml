@@ -1,0 +1,73 @@
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.21
+
+    - name: Build for Linux (amd64)
+      run: go build -v -ldflags="-s -w" -o ParksideWeb_linux_amd64
+      env:
+        GOOS: linux
+        GOARCH: amd64
+        
+    - name: Build for Linux (arm64)
+      run: go build -v -ldflags="-s -w" -o ParksideWeb_linux_arm64
+      env:
+        GOOS: linux
+        GOARCH: arm64
+        
+    - name: Build for Windows (amd64)
+      run: go build -v -ldflags="-s -w" -o ParksideWeb_windows_amd64.exe
+      env:
+        GOOS: windows
+        GOARCH: amd64
+        
+    - name: Build for macOS (amd64)
+      run: go build -v -ldflags="-s -w" -o ParksideWeb_macos_amd64
+      env:
+        GOOS: darwin
+        GOARCH: amd64
+    
+    - name: Build for macOS (arm64)
+      run: go build -v -ldflags="-s -w" -o ParksideWeb_macos_arm64
+      env:
+        GOOS: darwin
+        GOARCH: arm64
+    
+    - name: Test
+      run: go test -v
+    
+    - name: Upload Linux build
+      uses: actions/upload-artifact@v3
+      with:
+        name: Linux build
+        path: ParksideWeb_linux_*
+        retention-days: 30
+    
+    - name: Upload Windows build
+      uses: actions/upload-artifact@v3
+      with:
+        name: Windows build
+        path: ParksideWeb_windows_*
+        retention-days: 30
+    
+    - name: Upload macOS build
+      uses: actions/upload-artifact@v3
+      with:
+        name: macOS build
+        path: ParksideWeb_macos_*
+        retention-days: 30
