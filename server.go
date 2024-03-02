@@ -57,13 +57,13 @@ func (s *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 			Port:     serialPort,
 		})
 		if err != nil {
-			log.Printf("could not marshal JSON: %v", err)
+			log.Printf("Could not marshal JSON: %v", err)
 			return
 		}
 
 		writer.WriteHeader(http.StatusOK)
 		if _, err = writer.Write(b); err != nil {
-			log.Printf("could not write response: %v", err)
+			log.Printf("Could not write response: %v", err)
 			return
 		}
 		return
@@ -96,13 +96,13 @@ func (s *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 			Mode:     mode,
 		})
 		if err != nil {
-			log.Printf("could not marshal JSON: %v", err)
+			log.Printf("Could not marshal JSON: %v", err)
 			return
 		}
 
 		writer.WriteHeader(http.StatusOK)
 		if _, err = writer.Write(b); err != nil {
-			log.Printf("could not write response: %v", err)
+			log.Printf("Could not write response: %v", err)
 			return
 		}
 		return
